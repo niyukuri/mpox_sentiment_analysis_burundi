@@ -115,7 +115,7 @@ Engagement variables were **not used as predictors** in the classification model
 
 ```text
 Facebook Posts
-      │
+      |
       ▼
 Data Collection
       │
@@ -261,12 +261,12 @@ The test set remained isolated for final evaluation.
 | XLM-RoBERTa | Alarmist | 0.56 | 0.71 | **0.63** | 0.92 |
 | CamemBERT | Informative | 0.95 | 0.95 | 0.95 | 0.92 |
 | CamemBERT | Alarmist | 0.57 | 0.57 | 0.57 | 0.92 |
-| Logistic Regression | Informative | 0.91 | 0.95 | 0.93 | 0.88 |
-| Logistic Regression | Alarmist | 0.25 | 0.14 | 0.18 | 0.88 |
-| SVM | Informative | 0.91 | 0.98 | 0.95 | 0.90 |
-| SVM | Alarmist | 0.50 | 0.14 | 0.22 | 0.90 |
-| Naïve Bayes | Informative | 0.90 | 1.00 | 0.95 | 0.90 |
-| Naïve Bayes | Alarmist | 0.00 | 0.00 | 0.00 | 0.90 |
+| Logistic Regression | Informative | 0.93 | 0.97 | 0.95 | 0.90 |
+| Logistic Regression | Alarmist | 0.50 | 0.29 | 0.36 | 0.90 |
+| SVM | Informative | 0.93 | 0.97 | 0.95 | 0.90 |
+| SVM | Alarmist | 0.50 | 0.29 | 0.36 | 0.90 |
+| Naïve Bayes | Informative | 0.95 | 0.88 | 0.91 | 0.85 |
+| Naïve Bayes | Alarmist | 0.33 | 0.57 | 0.42 | 0.85 |
 
 On the held-out test set, XLM-RoBERTa correctly identified **5 of 7 alarmist posts**, while CamemBERT identified **4 of 7**. Both transformer models achieved an overall accuracy of 92%.
 
