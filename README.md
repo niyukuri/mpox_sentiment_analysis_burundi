@@ -1,575 +1,219 @@
 # Detecting Alarmist Mpox-Related Communication on Facebook in Burundi
 
-Machine learning and transformer-based NLP for detecting alarmist communication in Mpox-related Facebook posts in Burundi.
+**Machine learning and transformer-based approaches for digital epidemic intelligence**
+
+This research project evaluates natural language processing (NLP) methods for distinguishing **informative** from **alarmist** Mpox-related communication in publicly available Facebook posts collected in Burundi. It compares traditional machine-learning classifiers with French-language and multilingual transformer models and explores sentiment and engagement patterns.
+
+> **Important:** This is a research prototype, not an autonomous misinformation detector or a validated public-health alerting system. Model predictions should be interpreted in context and reviewed by a human analyst.
 
 ## Overview
 
-Social media platforms have become important channels for disseminating public health information during infectious disease outbreaks. At the same time, misinformation, sensationalized narratives, and emotionally charged content can complicate public understanding of disease risks.
+Social media can help public-health authorities understand how health information is communicated during outbreaks. However, factual reporting about cases, deaths, or disease risks can resemble alarmist language to automated classifiers. This project investigates that challenge in a French-dominant, low-resource setting.
 
-This project investigates the use of natural language processing (NLP) and machine learning to distinguish between **informative** and **alarmist** Mpox-related communication on Facebook in Burundi.
+The primary task is binary text classification:
 
-The study compares three traditional machine-learning algorithms:
+- **Informative (0):** factual, evidence-based information intended to inform, educate, or provide public-health guidance without exaggerated or fear-amplifying framing.
+- **Alarmist (1):** communication that uses exaggerated, sensationalized, fear-inducing, or anxiety-amplifying framing concerning Mpox.
 
-- Logistic Regression
-- Naïve Bayes
-- Support Vector Machine (SVM)
+Sentiment analysis is a **secondary descriptive analysis** and is not treated as equivalent to the informative/alarmist classification.
 
-with two transformer-based language models:
+## Study dataset
 
-- CamemBERT
-- XLM-RoBERTa
+The manuscript describes a manually collected dataset of **357 publicly available Facebook posts**, published from **14 April 2024 to 10 July 2026**.
 
-The project also includes secondary analyses of **sentiment** and **Facebook user engagement**.
+| Characteristic | Value |
+|---|---:|
+| Total posts | 357 |
+| Informative posts | 321 (89.9%) |
+| Alarmist posts | 36 (10.1%) |
+| Main language | French, with occasional English terminology |
+| Unit of analysis | Individual Facebook post |
 
-## Research Objectives
+Posts were collected from public institutional, health, media, and other public Facebook pages using predefined Mpox-related search terms. Private or restricted content, duplicates, unrelated advertisements, and posts without sufficient text were excluded.
 
-The study aims to:
+The manuscript identifies the following sources: Ministère de la Santé Publique du Burundi, Institut National de la Santé Publique du Burundi, UNICEF Burundi, Croix-Rouge Burundi, OMS Burundi, Global Development Community Burundi, US Embassy Bujumbura Burundi, WHO Regional Office for Africa, IOM Burundi, Andika Magazine, Jimbere Magazine, Akeza.net, and Yaga.
 
-1. Characterize sentiment and engagement patterns in Mpox-related Facebook communication in Burundi.
-2. Compare traditional machine-learning and transformer-based models for distinguishing informative and alarmist communication.
-3. Examine model misclassification patterns and identify contextual challenges relevant to automated digital epidemic intelligence.
+**Data access and privacy:** The raw dataset is not included in this repository and should not be redistributed without appropriate permission. The manuscript notes that public availability does not remove platform, privacy, or ethical constraints.
 
-## Dataset
+## Research objectives
 
-The dataset consists of publicly available Facebook posts related to Mpox and Mpox prevention in Burundi.
+1. Characterize sentiment and engagement patterns in Mpox-related Facebook posts.
+2. Compare traditional machine-learning and transformer-based models for identifying alarmist communication.
+3. Examine model errors and contextual challenges relevant to digital epidemic intelligence.
 
-### Data collection
+## Models evaluated
 
-Posts were manually collected from public Facebook pages using predefined search terms in French, English, and Kirundi, including:
-
-- `Mpox Burundi`
-- `MonkeyPox Burundi`
-- `Variole du singe Burundi`
-- `Akaranda`
-- `Ibihara vy’inkende`
-- `Mpox Vaccin Burundi`
-
-**Study period:** 14 April 2024 – 10 July 2026
-
-The dataset was predominantly French-language, with occasional English terminology.
-
-### Sources
-
-The study included public posts from 13 Facebook pages, including:
-
-- Ministère de la Santé Publique du Burundi
-- Institut National de la Santé Publique du Burundi (INSP)
-- UNICEF Burundi
-- Croix-Rouge Burundi
-- OMS Burundi
-- Global Development Community Burundi
-- US Embassy Bujumbura Burundi
-- Bureau Régional de l'OMS en Afrique
-- IOM Burundi
-- Andika Magazine
-- Jimbere Magazine
-- Akeza.net
-- Yaga
-
-Private or restricted content, duplicate posts, unrelated advertisements, and posts without sufficient textual information were excluded.
-
-## Dataset Summary
-
-The final dataset contains **357 Facebook posts**:
-
-| Category | Number | Percentage |
-|---|---:|---:|
-| Informative | 321 | 89.9% |
-| Alarmist | 36 | 10.1% |
-| **Total** | **357** | **100%** |
-
-The substantial class imbalance is an important characteristic of the classification problem.
-
-## Annotation
-
-Each post was manually assigned to one of two categories.
-
-### Informative
-
-Posts presenting factual, evidence-based information intended to inform, educate, or provide public-health guidance without exaggerated or fear-amplifying framing.
-
-### Alarmist
-
-Posts containing exaggerated, sensationalized, fear-inducing, or anxiety-amplifying language or framing concerning Mpox.
-
-The annotation was performed by two annotators using predefined labeling guidelines.
-
-## Data Structure
-
-| Variable | Description |
-|---|---|
-| `Date` | Publication date |
-| `Texte` | Original Facebook post |
-| `texte_clean` | Preprocessed text |
-| `PageName` | Publishing Facebook page or organization |
-| `Likes` | Number of likes/reactions |
-| `Shares` | Number of shares |
-| `Comments` | Number of comments |
-| `Engagement` | Likes + shares + comments |
-| `Category` | Numerical class: 0 = Informative, 1 = Alarmist |
-| `Category_Name` | Textual class label |
-
-Engagement variables were **not used as predictors** in the classification models. They were analyzed separately to characterize audience interaction.
-
-## Analytical Workflow
-
-```text
-Facebook Posts
-      │
-      ▼
-Data Collection
-      │
-      ▼
-Data Cleaning & Preprocessing
-      │
-      ├───────────────┐
-      │               │
-      ▼               ▼
-Sentiment         Classification
-Analysis              │
-                      ├── Traditional ML
-                      │     ├── Logistic Regression
-                      │     ├── Naïve Bayes
-                      │     └── SVM
-                      │
-                      └── Transformers
-                            ├── CamemBERT
-                            └── XLM-RoBERTa
-                      │
-                      ▼
-             Performance Evaluation
-                      │
-                      ▼
-             Error / Context Analysis
-```
-
-## Text Preprocessing
-
-### Traditional machine-learning models
-
-The preprocessing included:
-
-- Lowercase conversion
-- URL removal
-- Whitespace and encoding normalization
-- French-language normalization
-- Removal of punctuation and non-semantic elements
-- Keyword boosting for predefined alarm-related terms
-
-Alarm-related terms were repeated three times to increase their TF-IDF weight.
-
-### Transformer models
-
-Transformer preprocessing was designed to preserve contextual information.
-
-The workflow included:
-
-- Lowercase conversion
-- URL removal
-- Non-alphabetic character removal
-- Space normalization
-- Tokenization using the corresponding pretrained tokenizer
-- Maximum sequence length of 256 tokens
-
-Numerical information such as case counts and death tolls was retained where possible because it may carry epidemiological meaning.
-
-## Handling Class Imbalance
-
-To address the imbalance:
-
-- Stratified data splitting was used.
-- Minority-class oversampling with replacement was applied **only to the training data**.
-- Validation and test sets retained their natural class distribution.
-- Precision, recall, F1-score, and confusion matrices were emphasized rather than accuracy alone.
-
-## Machine-Learning Models
-
-### Traditional Models
-
-The following models were implemented using scikit-learn:
+### Traditional machine learning
 
 - Logistic Regression
 - Multinomial Naïve Bayes
-- Support Vector Machine
+- Support Vector Machine (SVM; LinearSVC)
 
-Text was represented using TF-IDF features with:
+Text is represented using TF–IDF features with up to 5,000 features and unigram/bigram terms (`ngram_range=(1, 2)`). Class weighting and minority-class oversampling are used to address class imbalance, as described in the study.
 
-```text
-max_features = 5000
-ngram_range = (1, 2)
-```
+### Transformer models
 
-Class weighting was used for Logistic Regression and LinearSVC.
+- **CamemBERT** — a French-language transformer model
+- **XLM-RoBERTa** — a multilingual transformer model
 
-### Transformer Models
+The manuscript describes fine-tuning with a maximum sequence length of 256 tokens, a learning rate of `1e-5`, batch size of 16, 10 epochs, AdamW optimization, and a weight decay of `0.01`.
 
-Two pretrained transformer models were fine-tuned:
+## Analysis workflow
 
-- **CamemBERT** – French-language transformer
-- **XLM-RoBERTa** – multilingual transformer
+1. **Collect and clean data:** Retrieve eligible public posts and remove duplicates and ineligible records.
+2. **Annotate posts:** Assign informative or alarmist labels using predefined guidelines and human judgement.
+3. **Preprocess text:** Apply TF–IDF-oriented cleaning for traditional models; use tokenization appropriate to each transformer.
+4. **Address class imbalance:** Apply oversampling only within training data/folds so validation and test data retain their natural class distribution.
+5. **Train and evaluate models:** Use a stratified 80/20 train/test split with `random_state=42`; use repeated stratified cross-validation on the training set.
+6. **Conduct secondary analyses:** Examine sentiment, likes, shares, comments, and total engagement.
+7. **Review errors:** Inspect false positives and false negatives to understand contextual ambiguity.
 
-Key parameters:
+Performance measures include accuracy, precision, recall, F1-score, and confusion matrices. Because alarmist posts are the minority class, alarmist-class recall and F1-score are particularly important.
 
-```text
-Learning rate: 1e-5
-Batch size: 16
-Epochs: 10
-Optimizer: AdamW
-Weight decay: 0.01
-Maximum sequence length: 256
-Random seed: 42
-```
+## Principal findings
 
-Training used an NVIDIA Tesla T4 GPU with mixed-precision training.
+On the held-out test set, the manuscript reports the following results:
 
-## Model Evaluation
+| Model | Informative F1 | Alarmist precision | Alarmist recall | Alarmist F1 | Accuracy |
+|---|---:|---:|---:|---:|---:|
+| XLM-RoBERTa | 0.95 | 0.56 | 0.71 | **0.63** | 0.92 |
+| CamemBERT | 0.95 | 0.57 | 0.57 | 0.57 | 0.92 |
+| Logistic Regression | 0.95 | 0.50 | 0.29 | 0.36 | 0.90 |
+| SVM | 0.95 | 0.50 | 0.29 | 0.36 | 0.90 |
+| Naïve Bayes | 0.91 | 0.33 | 0.57 | 0.42 | 0.85 |
 
-Models were evaluated using:
+The test set contained only **seven alarmist posts**, so the reported minority-class metrics are uncertain and should be interpreted cautiously. Cross-validation results also showed variability, and the study does not establish that one transformer will generalize best to new data.
 
-- Accuracy
-- Precision
-- Recall
-- F1-score
-- Confusion matrices
+The secondary sentiment analysis classified 313 posts as positive, 35 as negative, and 9 as neutral. Alarmist posts had higher average observed engagement in this dataset. These are descriptive findings: engagement does not establish faster diffusion or causal effects on public beliefs or behaviour.
 
-Because alarmist posts represented the minority class, **alarmist-class recall and F1-score** were considered particularly important.
+### Lessons from error analysis
 
-## Train/Test Strategy
+- Factual reports containing case counts, deaths, suspected cases, or words such as “risk” and “vigilance” were sometimes classified as alarmist.
+- Some alarmist posts expressed themselves in calm or formal language and were missed by models.
+- Negative sentiment is not the same as alarmist communication.
+- Contextual human review is essential when interpreting predictions.
 
-The dataset was divided using a stratified:
+## Repository contents
 
-- **80% training set**
-- **20% held-out test set**
-
-The same test partition was used for model comparison.
-
-Repeated stratified cross-validation was additionally performed on the training set using:
+The repository can be organized as follows. Adapt the names to match the files actually committed:
 
 ```text
-7 folds × 3 repeats
+.
+├── README.md
+├── requirements.txt
+├── notebooks/
+│   ├── 01_data_exploration.ipynb
+│   ├── 02_sentiment_analysis.ipynb
+│   ├── 03_traditional_models.ipynb
+│   └── 04_transformer_models.ipynb
+├── src/
+│   ├── preprocessing.py
+│   ├── train_classical.py
+│   ├── train_transformer.py
+│   └── evaluate.py
+├── results/
+│   ├── figures/
+│   └── metrics/
+└── docs/
+    └── study_manuscript.pdf
 ```
 
-The test set remained isolated for final evaluation.
+This is a **suggested structure**, not a claim that these files are already present. Only add entries for files that are actually included in the repository.
 
-## Results
+## Installation
 
-### Test-set performance
+Use Python 3.10 or a compatible version supported by the selected package releases.
 
-| Model | Class | Precision | Recall | F1-score | Accuracy |
-|---|---|---:|---:|---:|---:|
-| XLM-RoBERTa | Informative | 0.97 | 0.94 | 0.95 | 0.92 |
-| XLM-RoBERTa | Alarmist | 0.56 | 0.71 | **0.63** | 0.92 |
-| CamemBERT | Informative | 0.95 | 0.95 | 0.95 | 0.92 |
-| CamemBERT | Alarmist | 0.57 | 0.57 | 0.57 | 0.92 |
-| Logistic Regression | Informative | 0.91 | 0.95 | 0.93 | 0.88 |
-| Logistic Regression | Alarmist | 0.25 | 0.14 | 0.18 | 0.88 |
-| SVM | Informative | 0.91 | 0.98 | 0.95 | 0.90 |
-| SVM | Alarmist | 0.50 | 0.14 | 0.22 | 0.90 |
-| Naïve Bayes | Informative | 0.90 | 1.00 | 0.95 | 0.90 |
-| Naïve Bayes | Alarmist | 0.00 | 0.00 | 0.00 | 0.90 |
+```bash
+git clone <YOUR-REPOSITORY-URL>
+cd <YOUR-REPOSITORY-DIRECTORY>
 
-On the held-out test set, XLM-RoBERTa correctly identified **5 of 7 alarmist posts**, while CamemBERT identified **4 of 7**. Both transformer models achieved an overall accuracy of 92%.
-
-Because only seven alarmist posts were present in the test set, minority-class performance estimates should be interpreted cautiously.
-
-## Sentiment Analysis
-
-Sentiment analysis was conducted as a **secondary exploratory analysis** using a pretrained Hugging Face transformer pipeline.
-
-Among the 357 posts:
-
-- **313 (≈88%)** were classified as positive
-- **35 (≈10%)** were classified as negative
-- **9 (≈3%)** were classified as neutral
-
-Sentiment and alarmist communication are treated as different concepts. A negative post is not necessarily alarmist, and an informative post may contain negative or emotionally charged language.
-
-## Engagement Analysis
-
-The project examines:
-
-- Likes
-- Shares
-- Comments
-- Total engagement
-
-Observed average engagement was higher for alarmist posts in the collected dataset:
-
-| Category | Likes | Shares | Comments |
-|---|---:|---:|---:|
-| Informative | ~61 | ~11 | ~3 |
-| Alarmist | ~142 | ~36 | ~5 |
-
-These descriptive findings should **not** be interpreted as evidence that alarmist posts spread faster or cause changes in public beliefs or behavior.
-
-## Misclassification Analysis
-
-Several informative posts were incorrectly classified as alarmist when they contained:
-
-- Case counts
-- Death tolls
-- Suspected cases
-- Terms such as `risk`
-- `propagation`
-- `vigilance`
-- `dangerous`
-
-Conversely, some alarmist posts were classified as informative because they used calm, formal, or solution-oriented language.
-
-These findings demonstrate that isolated keywords or sentiment are insufficient for reliably identifying alarmist communication. Context remains essential.
-
-## Digital Epidemic Intelligence
-
-The proposed application is a **decision-support workflow**:
-
-```text
-Social Media Monitoring
-        ↓
-Automated NLP Screening
-        ↓
-Potentially Alarmist Content
-        ↓
-Human Contextual Review
-        ↓
-Risk Communication / Public Health Response
+python -m venv .venv
 ```
 
-The models are intended to help **prioritize content for human review**, rather than autonomously determine whether information is misinformation or represents a public-health risk.
+Activate the environment:
 
-## Reproducibility
+```bash
+# macOS / Linux
+source .venv/bin/activate
 
-The analysis uses:
-
-```text
-RANDOM_STATE = 42
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
 ```
 
-Key software packages include:
+Install dependencies after creating a `requirements.txt` containing the versions tested by the project:
 
-- Python
-- PyTorch
-- Transformers
-- scikit-learn
-- pandas
-- matplotlib
-- openpyxl
-- sentencepiece
+```bash
+pip install -r requirements.txt
+```
 
-Transformer experiments were conducted using an NVIDIA Tesla T4 GPU.
+The manuscript identifies these main libraries:
 
-## Ethical Considerations
+- `pandas`
+- `scikit-learn`
+- `torch`
+- `transformers`
+- `sentencepiece`
+- `matplotlib`
+- `openpyxl`
 
-Only publicly accessible Facebook content was included.
+GPU acceleration was used for transformer training in the reported experiments (NVIDIA Tesla T4, with mixed precision). A compatible GPU is helpful for fine-tuning transformers; traditional TF–IDF models can generally run on a CPU.
 
-- Private and restricted content was excluded.
-- Personal identifiers were not analyzed or reported.
-- The project does not seek to identify individual users.
+## Data and reproducibility
 
-## Data Availability
+The manuscript describes a stratified 80/20 train/test split with a fixed random seed of 42 and repeated stratified cross-validation on the training data. Oversampling should occur **only within each training fold** to prevent information leakage.
 
-The raw Facebook dataset is **not publicly redistributed** because it consists of social-media content subject to platform terms and privacy considerations.
+The raw Facebook dataset is not distributed with this project. To reproduce the analysis, users need lawful access to an appropriately governed dataset and the corresponding preprocessing, annotation, training, and evaluation code.
 
-Any derived or anonymized dataset should only be shared where permitted by applicable ethical and platform requirements.
+Before claiming full reproducibility, document the exact Python and package versions, pretrained model identifiers and revisions, annotation guidelines, data-cleaning steps, random seeds, split indices where sharing is appropriate, and model-selection procedure. Avoid publishing private information or post-level content that cannot be redistributed.
 
-This repository therefore focuses on the analytical workflow, code, and reproducible methodology rather than redistribution of the raw Facebook posts.
+## Ethical considerations and responsible use
+
+- Use only data collected and processed in accordance with applicable platform terms, ethical requirements, and relevant laws.
+- Do not publish private or restricted content, personal identifiers, or a raw dataset whose redistribution is not authorized.
+- Treat predictions as signals for **prioritizing human review**, not as definitive judgements about misinformation, intent, credibility, or public-health risk.
+- Review false positives and false negatives, especially for factual epidemiological updates and public-health advice.
+- Evaluate performance across languages, sources, and time periods before considering any operational use.
+- Do not use model outputs to target, penalize, or stigmatize individuals or communities.
 
 ## Limitations
 
-1. The dataset contains only 357 posts and 36 alarmist posts.
-2. Only seven alarmist posts were present in the held-out test set.
-3. The study focuses on Facebook and does not represent other social-media platforms.
-4. The dataset is predominantly French and does not fully represent Burundi's multilingual communication environment, including Kirundi, English, and Swahili.
-5. Manual annotation involves contextual judgment.
-6. The binary framework does not capture all forms of health communication, including misinformation, disinformation, rumors, opinions, preventive advice, and official announcements.
+The study has several limitations:
 
-## Future Work
+1. The dataset is relatively small and contains only 36 alarmist posts.
+2. Only seven alarmist posts occur in the held-out test set.
+3. Data come from Facebook and may not represent other platforms or the wider population.
+4. The corpus is predominantly French and does not fully represent Burundi's multilingual communication environment.
+5. Human annotation involves judgement, and informative and alarmist framing can be context-dependent.
+6. The binary labels do not cover all communication types, such as misinformation, disinformation, rumours, opinions, preventive advice, or official announcements.
 
-Future development will focus on:
+## Future work
 
-- Larger and more diverse datasets
-- Multiple social-media platforms
-- Multilingual analysis
-- Improved annotation protocols
-- Repeated cross-validation
-- Confidence intervals
-- Explainable AI
-- Context-aware classification
-- Prospective digital epidemic intelligence systems
-- Integration of automated screening with human review
+Potential extensions include larger and more diverse datasets, additional languages and platforms, stronger annotation and inter-annotator agreement procedures, confidence intervals, explainability methods, temporal evaluation, and prospective evaluation of human-in-the-loop digital epidemic intelligence workflows.
 
 ## Citation
 
-If you use this repository or its methodology, please cite the associated research article:
+If you use or discuss this work, cite the manuscript using the author and title information below. Add the final publication details or DOI when available.
 
-> Sakubu D, Gatore Sinigirira KJ, Ntacoyanyimye S, Kamatari O, Havyarimana P, Ndikuryayo S, Irumva KC, Renguka LC, Bishola T, Niyukuri D.  
-> **Detecting alarmist Mpox-related communication on Facebook in Burundi using machine learning and transformer-based models.**
+> Sakubu, D., Gatore Sinigirira, K. J., Ntacoyanyimye, S., Kamatari, O., Havyarimana, P., Ndikuryayo, S., Irumva, K. C., Renguka, L. C., Bishola, T., & Niyukuri, D. *Detecting alarmist Mpox-related communication on Facebook in Burundi using machine learning and transformer-based models.* Manuscript.
 
-## Funding
+## Funding and acknowledgements
 
-This work was supported by financial contributions from UK International Development and the International Development Research Centre (IDRC), Ottawa, Canada, under the **AI for Development: Responsible AI, Empowering People (AI4D) Program**.
-
-The work also received support from the **UK Medical Research Council (MRC) through UK Research and Innovation (UKRI)**, in collaboration with Imperial College London (Grant No. 2029; Project PB4838).
-
-## Authors
-
-- Daxelle Sakubu
-- Kelly Joelle Gatore Sinigirira
-- Sadock Ntacoyanyimye
-- Olivier Kamatari
-- Pierre Havyarimana
-- Symphorien Ndikuryayo
-- Kelly Chandelle Irumva
-- Luxe Claudia Renguka
-- Tania Bishola
-- David Niyukuri
-
-### Affiliations
-
-**University of Burundi**  
-Doctoral School  
-Department of Mathematics, Faculty of Science  
-Institute of Applied Statistics
-
-**Stellenbosch University**  
-South African Centre for Epidemiological Modelling and Analysis  
-Centre for Epidemic Response and Innovation
-
-**University of Kinshasa**  
-Department of Life Science
+The manuscript reports support from the UK International Development and the International Development Research Centre (IDRC), Ottawa, Canada, through the AI for Development: Responsible AI, Empowering People (AI4D) Program, and from the UK Medical Research Council (MRC) through UK Research and Innovation (UKRI), in collaboration with Imperial College London (Project PB4838). The manuscript states that its views do not necessarily represent those of IDRC, its Board of Governors, or the official policies of the UK Government.
 
 ## License
 
 MIT License
 
-Copyright (c) 2026 David Niyukuri and co-authors
+Copyright (c) 2026 David Niyukuri and project contributors
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all  copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
----
 
-> **Note:** The raw Facebook dataset is not included in this repository. Researchers interested in collaboration or access to permitted derived data should contact the study authors.
+## Contact
 
-**14 April 2024 – 10 July 2026**
-
-The dataset was predominantly French-language, with occasional English
-terminology.
-
-### Sources
-
-The study included public posts from 13 Facebook pages, including:
-
-- Ministère de la Santé Publique du Burundi
-- Institut National de la Santé Publique du Burundi (INSP)
-- UNICEF Burundi
-- Croix-Rouge Burundi
-- OMS Burundi
-- Global Development Community Burundi
-- US Embassy Bujumbura Burundi
-- Bureau Régional de l'OMS en Afrique
-- IOM Burundi
-- Andika Magazine
-- Jimbere Magazine
-- Akeza.net
-- Yaga
-
-Private or restricted content, duplicate posts, unrelated advertisements, and
-posts without sufficient textual information were excluded.
-
-## Dataset Summary
-
-The final dataset contains **357 Facebook posts**:
-
-| Category | Number | Percentage |
-|---|---:|---:|
-| Informative | 321 | 89.9% |
-| Alarmist | 36 | 10.1% |
-| **Total** | **357** | **100%** |
-
-The substantial class imbalance is an important characteristic of the
-classification problem.
-
-## Annotation
-
-Each post was manually assigned to one of two categories.
-
-### Informative
-
-Posts presenting factual, evidence-based information intended to inform,
-educate, or provide public-health guidance without exaggerated or
-fear-amplifying framing.
-
-### Alarmist
-
-Posts containing exaggerated, sensationalized, fear-inducing, or
-anxiety-amplifying language or framing concerning Mpox.
-
-The annotation was performed by two annotators using predefined labeling
-guidelines.
-
-## Data Structure
-
-The dataset contains variables describing textual content, publication
-information, classification, and user engagement.
-
-| Variable | Description |
-|---|---|
-| `Date` | Publication date |
-| `Texte` | Original Facebook post |
-| `texte_clean` | Preprocessed text |
-| `PageName` | Publishing Facebook page or organization |
-| `Likes` | Number of likes/reactions |
-| `Shares` | Number of shares |
-| `Comments` | Number of comments |
-| `Engagement` | Likes + shares + comments |
-| `Category` | Numerical class: 0 = Informative, 1 = Alarmist |
-| `Category_Name` | Textual class label |
-
-Engagement variables were **not used as predictors** in the classification
-models. They were analyzed separately to characterize audience interaction.
-
-## Analytical Workflow
-
-```text
-Facebook Posts
-      │
-      ▼
-Data Collection
-      │
-      ▼
-Data Cleaning & Preprocessing
-      │
-      ├───────────────┐
-      │               │
-      ▼               ▼
-Sentiment         Classification
-Analysis              │
-                      ├── Traditional ML
-                      │     ├── Logistic Regression
-                      │     ├── Naïve Bayes
-                      │     └── SVM
-                      │
-                      └── Transformers
-                            ├── CamemBERT
-                            └── XLM-RoBERTa
-                      │
-                      ▼
-             Performance Evaluation
-                      │
-                      ▼
-             Error / Context Analysis
+For research enquiries, contact the corresponding project team through the contact details provided in the associated publication or the repository's GitHub profile.
