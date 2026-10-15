@@ -6,6 +6,72 @@ This research project evaluates natural language processing (NLP) methods for di
 
 > **Important:** This is a research prototype, not an autonomous misinformation detector or a validated public-health alerting system. Model predictions should be interpreted in context and reviewed by a human analyst.
 
+## Annotation
+
+Each post was manually assigned to one of two categories.
+
+### Informative
+
+Posts presenting factual, evidence-based information intended to inform, educate, or provide public-health guidance without exaggerated or fear-amplifying framing.
+
+### Alarmist
+
+Posts containing exaggerated, sensationalized, fear-inducing, or anxiety-amplifying language or framing concerning Mpox.
+
+The annotation was performed by two annotators using predefined labeling guidelines.
+
+## Data Structure
+
+| Variable | Description |
+|---|---|
+| `Date` | Publication date |
+| `Texte` | Original Facebook post |
+| `texte_clean` | Preprocessed text |
+| `PageName` | Publishing Facebook page or organization |
+| `Likes` | Number of likes/reactions |
+| `Shares` | Number of shares |
+| `Comments` | Number of comments |
+| `Engagement` | Likes + shares + comments |
+| `Category` | Numerical class: 0 = Informative, 1 = Alarmist |
+| `Category_Name` | Textual class label |
+
+Engagement variables were **not used as predictors** in the classification models. They were analyzed separately to characterize audience interaction.
+
+## Analytical Workflow
+
+```text
+Facebook Posts
+      |
+      ▼
+Data Collection
+      │
+      ▼
+Data Cleaning & Preprocessing
+      │
+      ├───────────────┐
+      │               │
+      ▼               ▼
+Sentiment         Classification
+Analysis              │
+                      ├── Traditional ML
+                      │     ├── Logistic Regression
+                      │     ├── Naïve Bayes
+                      │     └── SVM
+                      │
+                      └── Transformers
+                            ├── CamemBERT
+                            └── XLM-RoBERTa
+                      │
+                      ▼
+             Performance Evaluation
+                      │
+                      ▼
+             Error / Context Analysis
+```
+
+## Text Preprocessing
+
+### Traditional machine-learning models
 ## Overview
 
 Social media can help public-health authorities understand how health information is communicated during outbreaks. However, factual reporting about cases, deaths, or disease risks can resemble alarmist language to automated classifiers. This project investigates that challenge in a French-dominant, low-resource setting.
@@ -120,6 +186,18 @@ The repository can be organized as follows. Adapt the names to match the files a
 
 This is a **suggested structure**, not a claim that these files are already present. Only add entries for files that are actually included in the repository.
 
+| Model | Class | Precision | Recall | F1-score | Accuracy |
+|---|---|---:|---:|---:|---:|
+| XLM-RoBERTa | Informative | 0.97 | 0.94 | 0.95 | 0.92 |
+| XLM-RoBERTa | Alarmist | 0.56 | 0.71 | **0.63** | 0.92 |
+| CamemBERT | Informative | 0.95 | 0.95 | 0.95 | 0.92 |
+| CamemBERT | Alarmist | 0.57 | 0.57 | 0.57 | 0.92 |
+| Logistic Regression | Informative | 0.93 | 0.97 | 0.95 | 0.90 |
+| Logistic Regression | Alarmist | 0.50 | 0.29 | 0.36 | 0.90 |
+| SVM | Informative | 0.93 | 0.97 | 0.95 | 0.90 |
+| SVM | Alarmist | 0.50 | 0.29 | 0.36 | 0.90 |
+| Naïve Bayes | Informative | 0.95 | 0.88 | 0.91 | 0.85 |
+| Naïve Bayes | Alarmist | 0.33 | 0.57 | 0.42 | 0.85 |
 ## Installation
 
 Use Python 3.10 or a compatible version supported by the selected package releases.
